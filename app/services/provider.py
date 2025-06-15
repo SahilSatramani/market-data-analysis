@@ -4,6 +4,7 @@ import os
 from app.models.raw_market_data import RawMarketData
 from app.core.config import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
+from app.kafka.producer import publish_price_event
 
 async def fetch_price(symbol: str, provider: str):
     if provider == "alpha_vantage":
@@ -51,6 +52,15 @@ async def fetch_price(symbol: str, provider: str):
             raise
         finally:
             db.close()
+        
+        event = {
+            "symbol": quote.get("01. symbol", symbol),
+            "price": price,
+            "timestamp": datetime.utcnow().isoformat(),
+            "provider": provider,
+            "raw": quote
+        }
+        publish_price_event(event)    
 
         # Return response for API
         return {
