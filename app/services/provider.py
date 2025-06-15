@@ -1,10 +1,9 @@
 import requests
 from datetime import datetime
 import os
-
-#API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
-
-#print("🔐 API Key from ENV:", os.getenv("ALPHA_VANTAGE_API_KEY"))
+from app.models.raw_market_data import RawMarketData
+from app.core.config import SessionLocal
+from sqlalchemy.exc import SQLAlchemyError
 
 async def fetch_price(symbol: str, provider: str):
     if provider == "alpha_vantage":
@@ -15,11 +14,12 @@ async def fetch_price(symbol: str, provider: str):
             "symbol": symbol,
             "apikey": API_KEY
         }
+
         response = requests.get(url, params=params)
 
         try:
             data = response.json()
-            print("Raw Alpha Vantage response:", data)
+            print("📊 Raw Alpha Vantage response:", data)
         except Exception as e:
             print("Error parsing JSON:", e)
             print("Raw response:", response.text)
@@ -29,10 +29,33 @@ async def fetch_price(symbol: str, provider: str):
             raise ValueError(f"Alpha Vantage response missing 'Global Quote': {data}")
 
         quote = data["Global Quote"]
+        price = float(quote["05. price"])
 
+        # Save to database
+        db = SessionLocal()
+        try:
+            record = RawMarketData(
+                symbol=quote.get("01. symbol", symbol),
+                price=price,
+                timestamp=datetime.utcnow(),
+                provider=provider,
+                raw_response=data
+            )
+            db.add(record)
+            db.commit()
+            db.refresh(record)
+            print("Data saved to DB with ID:", record.id)
+        except SQLAlchemyError as e:
+            db.rollback()
+            print("DB Error:", str(e))
+            raise
+        finally:
+            db.close()
+
+        # Return response for API
         return {
             "symbol": quote.get("01. symbol", symbol),
-            "price": float(quote["05. price"]),
+            "price": price,
             "timestamp": datetime.utcnow(),
             "provider": "alpha_vantage"
         }
