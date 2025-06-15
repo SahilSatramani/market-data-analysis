@@ -19,7 +19,7 @@ async def fetch_price(symbol: str, provider: str):
 
         try:
             data = response.json()
-            print("📊 Raw Alpha Vantage response:", data)
+            print("Raw Alpha Vantage response:", data)
         except Exception as e:
             print("Error parsing JSON:", e)
             print("Raw response:", response.text)
