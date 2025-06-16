@@ -23,11 +23,16 @@ This project is a real-time **market data ingestion and analysis pipeline** buil
 
 ## How to Run
 
-### 1. Clone the repo and enter the directory
+## ⚙️ Local Setup
+
+Follow these steps to run the project locally using Docker Compose.
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/market-data-service.git
-cd market-data-service
+1. Clone the repository
+git clone https://github.com/your-username/market-data-analysis.git
+cd market-data-analysis
 
 2. Create and activate a virtual environment
 python3 -m venv venv
@@ -37,5 +42,30 @@ source venv/bin/activate  # For Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 4. Add your .env file
-ALPHA_VANTAGE_API_KEY=your_api_key_here
+cat <<EOF > .env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=marketdata
+DATABASE_URL=postgresql://postgres:postgres@db:5432/marketdata
+ALPHA_VANTAGE_API_KEY=your_actual_key
+KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+EOF
+```
+## Start all services via Docker Compose
+```bash
+docker-compose up --build
+```
+## Test the Endpoint
+```bash
+curl "http://127.0.0.1:8000/prices/latest?symbol=AAPL&provider=alpha_vantage"
+```
+---
 
+##  Github Actions Include 
+
+- Python linting via flake8
+- Docker Compose setup
+- Endpoint test (/prices/latest)
+- DB migration test
+  
+---
