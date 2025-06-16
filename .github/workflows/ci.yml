@@ -10,20 +10,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U sahil"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_KAFKA }}
+      ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
     steps:
       - uses: actions/checkout@v3
@@ -42,9 +35,41 @@ jobs:
       - name: Lint with flake8
         run: flake8 app scripts --max-line-length=120
 
-      - name: Run tests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PYTHONPATH: .
+      - name: Install Docker Compose
         run: |
-          python scripts/createDB.py
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Create .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL_KAFKA }}" >> .env
+          echo "ALPHA_VANTAGE_API_KEY=${{ secrets.ALPHAVANTAGE_API_KEY }}" >> .env
+          echo "KAFKA_BOOTSTRAP_SERVERS=kafka:29092" >> .env
+
+      - name: Build Docker containers
+        run: docker-compose build
+
+      - name: Run containers
+        run: docker-compose up -d
+      
+      - name: Download wait-for-it script
+        run: |
+          curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+          chmod +x wait-for-it.sh 
+      
+      - name: Run DB migrations with wait
+        run: ./wait-for-it.sh localhost:5432 -- docker-compose run --rm migration    
+
+      - name: Test FastAPI latest price endpoint
+        run: |
+          echo "Testing /prices/latest..."
+          sleep 10  # allow FastAPI to fully boot
+          curl -v "http://127.0.0.1:8000/prices/latest?symbol=AAPL&provider=alpha_vantage"
+      
+      - name: Print FastAPI logs
+        run: docker logs $(docker ps -qf "name=fastapi")
+           

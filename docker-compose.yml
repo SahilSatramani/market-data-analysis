@@ -22,16 +22,6 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  fastapi:
-    build: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - kafka
-    env_file:
-      - .env
-    volumes:
-      - .:/app
   db:
     image: postgres:15
     restart: always
@@ -41,3 +31,40 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
+
+  fastapi:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+
+  consumer:
+    build: .
+    command: python app/kafka/consumer.py
+    depends_on:
+      - kafka
+      - db
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app  
+    volumes:
+      - .:/app
+
+  migration:
+    build: .
+    command: python scripts/createDB.py
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app
+    volumes:
+      - .:/app  
