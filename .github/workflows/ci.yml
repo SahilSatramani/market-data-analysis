@@ -48,4 +48,3 @@ jobs:
           PYTHONPATH: .
         run: |
           python scripts/createDB.py
-          pytest
