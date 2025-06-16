@@ -45,6 +45,7 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PYTHONPATH: .
         run: |
           python scripts/createDB.py
           pytest
