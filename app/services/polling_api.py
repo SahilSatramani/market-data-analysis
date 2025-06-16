@@ -23,6 +23,7 @@ async def start_polling_job_logic(request):
         db.commit()
         db.refresh(job)
     except Exception as e:
+        print(f"Error saving job to DB: {e}")
         db.rollback()
         raise
     finally:
