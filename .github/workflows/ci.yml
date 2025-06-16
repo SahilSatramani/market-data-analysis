@@ -55,3 +55,7 @@ jobs:
 
       - name: Run containers
         run: docker-compose up -d
+
+      - name: Test GET /prices/latest
+        run: |
+          docker exec $(docker ps -qf "name=fastapi") curl -s "http://localhost:8000/prices/latest?symbol=AAPL"  
