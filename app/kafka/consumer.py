@@ -31,7 +31,7 @@ def upsert_symbol_average(db: Session, symbol: str, average: float):
 def consume_price_events():
 
     consumer = Consumer({
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': 'kafka:29092',
         'group.id': 'ma-consumer-group',
         'auto.offset.reset': 'earliest'
     })
