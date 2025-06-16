@@ -55,6 +55,9 @@ jobs:
 
       - name: Run containers
         run: docker-compose up -d
+      
+      - name: Run DB migrations
+        run: docker-compose run --rm migration  
 
       - name: Test FastAPI latest price endpoint
         run: |

@@ -54,3 +54,13 @@ services:
       - .env
     volumes:
       - .:/app
+
+  migration:
+    build: .
+    command: python scripts/createDB.py
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/app    
