@@ -56,8 +56,13 @@ jobs:
       - name: Run containers
         run: docker-compose up -d
       
-      - name: Run DB migrations
-        run: docker-compose run --rm migration  
+      - name: Download wait-for-it script
+        run: |
+          curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+          chmod +x wait-for-it.sh 
+      
+      - name: Run DB migrations with wait
+        run: ./wait-for-it.sh localhost:5432 -- docker-compose run --rm migration    
 
       - name: Test FastAPI latest price endpoint
         run: |
