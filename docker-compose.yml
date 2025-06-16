@@ -62,5 +62,7 @@ services:
       - db
     env_file:
       - .env
+    environment:
+      PYTHONPATH: /app
     volumes:
-      - .:/app    
+      - .:/app  
