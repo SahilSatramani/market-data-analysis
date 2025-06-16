@@ -6,15 +6,12 @@ from app.core.config import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
 from app.kafka.producer import publish_price_event
 
+
 async def fetch_price(symbol: str, provider: str):
     if provider == "alpha_vantage":
         API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
         url = "https://www.alphavantage.co/query"
-        params = {
-            "function": "GLOBAL_QUOTE",
-            "symbol": symbol,
-            "apikey": API_KEY
-        }
+        params = {"function": "GLOBAL_QUOTE", "symbol": symbol, "apikey": API_KEY}
 
         response = requests.get(url, params=params)
 
@@ -40,7 +37,7 @@ async def fetch_price(symbol: str, provider: str):
                 price=price,
                 timestamp=datetime.utcnow(),
                 provider=provider,
-                raw_response=data
+                raw_response=data,
             )
             db.add(record)
             db.commit()
@@ -52,22 +49,22 @@ async def fetch_price(symbol: str, provider: str):
             raise
         finally:
             db.close()
-        
+
         event = {
             "symbol": quote.get("01. symbol", symbol),
             "price": price,
             "timestamp": datetime.utcnow().isoformat(),
             "provider": provider,
-            "raw": quote
+            "raw": quote,
         }
-        publish_price_event(event)    
+        publish_price_event(event)
 
         # Return response for API
         return {
             "symbol": quote.get("01. symbol", symbol),
             "price": price,
             "timestamp": datetime.utcnow(),
-            "provider": "alpha_vantage"
+            "provider": "alpha_vantage",
         }
 
     else:

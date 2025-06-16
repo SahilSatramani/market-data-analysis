@@ -5,8 +5,10 @@ from app.core.config import SessionLocal
 from app.models.symbol_average import SymbolAverage
 from app.models.raw_market_data import RawMarketData
 
+
 def calculate_moving_average(prices: list[float]) -> float:
     return round(sum(prices) / len(prices), 2)
+
 
 def get_last_5_prices(db: Session, symbol: str) -> list[float]:
     records = (
@@ -18,6 +20,7 @@ def get_last_5_prices(db: Session, symbol: str) -> list[float]:
     )
     return [r.price for r in records]
 
+
 def upsert_symbol_average(db: Session, symbol: str, average: float):
     existing = db.query(SymbolAverage).filter_by(symbol=symbol).first()
     if existing:
@@ -28,15 +31,18 @@ def upsert_symbol_average(db: Session, symbol: str, average: float):
     db.commit()
     print(f"Upserted moving average for {symbol}: {average}")
 
+
 def consume_price_events():
 
-    consumer = Consumer({
-        'bootstrap.servers': 'kafka:29092',
-        'group.id': 'ma-consumer-group',
-        'auto.offset.reset': 'earliest'
-    })
+    consumer = Consumer(
+        {
+            "bootstrap.servers": "kafka:29092",
+            "group.id": "ma-consumer-group",
+            "auto.offset.reset": "earliest",
+        }
+    )
 
-    consumer.subscribe(['price-events'])
+    consumer.subscribe(["price-events"])
     print("Listening for price events to calculate moving average")
 
     try:
@@ -49,8 +55,8 @@ def consume_price_events():
                 continue
 
             try:
-                event = json.loads(msg.value().decode('utf-8'))
-                symbol = event['symbol']
+                event = json.loads(msg.value().decode("utf-8"))
+                symbol = event["symbol"]
                 db = SessionLocal()
 
                 prices = get_last_5_prices(db, symbol)
@@ -71,6 +77,7 @@ def consume_price_events():
         print("Stopping MA consumer...")
     finally:
         consumer.close()
+
 
 if __name__ == "__main__":
     consume_price_events()

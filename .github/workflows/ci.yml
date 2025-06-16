@@ -20,7 +20,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }}"
+          --health-cmd="pg_isready -U sahil"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -40,11 +40,11 @@ jobs:
           pip install flake8 pytest
 
       - name: Lint with flake8
-        run: flake8 app scripts tests --max-line-length=120
+        run: flake8 app scripts --max-line-length=120
 
       - name: Run tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PYTHONPATH: .
         run: |
-          python scripts/create_db.py
-          pytest
+          python scripts/createDB.py

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, JSON
 from datetime import datetime
 from app.core.config import Base
 
+
 class RawMarketData(Base):
     __tablename__ = "raw_market_data"
 
