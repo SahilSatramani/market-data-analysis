@@ -60,4 +60,4 @@ jobs:
         run: |
           echo "Testing /prices/latest..."
           sleep 10  # allow FastAPI to fully boot
-          curl -v "http://localhost:8000/prices/latest?symbol=AAPL"
+          curl -v "http://127.0.0.1:8000/prices/latest?symbol=AAPL&provider=alpha_vantage"
