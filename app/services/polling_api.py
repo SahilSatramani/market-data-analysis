@@ -4,6 +4,7 @@ from app.services.provider import fetch_price
 from app.models.polling_job import PollingJob
 from app.core.config import SessionLocal
 
+
 async def start_polling_job_logic(request):
     job_id = f"poll_{uuid.uuid4().hex[:8]}"
 
@@ -16,7 +17,7 @@ async def start_polling_job_logic(request):
             interval=request.interval,
             provider=request.provider,
             max_runs=request.max_runs or 10,
-            status="running"
+            status="running",
         )
         db.add(job)
         db.commit()
