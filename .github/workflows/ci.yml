@@ -47,7 +47,7 @@ jobs:
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL_KAFKA }}" >> .env
-          echo "ALPHAVANTAGE_API_KEY=${{ secrets.ALPHAVANTAGE_API_KEY }}" >> .env
+          echo "ALPHA_VANTAGE_API_KEY=${{ secrets.ALPHAVANTAGE_API_KEY }}" >> .env
           echo "KAFKA_BOOTSTRAP_SERVERS=kafka:29092" >> .env
 
       - name: Build Docker containers
