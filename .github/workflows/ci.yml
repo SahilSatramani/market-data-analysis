@@ -66,4 +66,5 @@ jobs:
           curl -v "http://127.0.0.1:8000/prices/latest?symbol=AAPL&provider=alpha_vantage"
       
       - name: Print FastAPI logs
-        run: docker logs $(docker ps -qf "name=fastapi")   
+        run: docker logs $(docker ps -qf "name=fastapi")
+           
