@@ -67,5 +67,7 @@ curl "http://127.0.0.1:8000/prices/latest?symbol=AAPL&provider=alpha_vantage"
 - Docker Compose setup
 - Endpoint test (/prices/latest)
 - DB migration test
+
+
   
 ---
